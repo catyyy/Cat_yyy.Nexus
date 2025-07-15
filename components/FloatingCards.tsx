@@ -199,11 +199,32 @@ export default function FloatingCards({ points = [] }: FloatingCardsProps) {
   };
 
   const handleCardLeave = (index: number) => {
+    // 移动端点击后不立即关闭，允许用户查看内容
+    const isMobile = windowSize.width <= 768;
+    if (isMobile) return;
+    
     setActiveCard(null);
     setTypedIndexes([]);
     if (typingInterval.current) clearInterval(typingInterval.current);
     if (oomphInstances.current[index]) {
       oomphInstances.current[index]?.unscrambleText();
+    }
+  };
+
+  const handleCardClick = (index: number) => {
+    // 移动端点击处理：如果卡片已激活则关闭，否则激活
+    const isMobile = windowSize.width <= 768;
+    if (isMobile) {
+      if (activeCard === index) {
+        setActiveCard(null);
+        setTypedIndexes([]);
+        if (typingInterval.current) clearInterval(typingInterval.current);
+        if (oomphInstances.current[index]) {
+          oomphInstances.current[index]?.unscrambleText();
+        }
+      } else {
+        handleCardEnter(index);
+      }
     }
   };
 
@@ -259,12 +280,31 @@ export default function FloatingCards({ points = [] }: FloatingCardsProps) {
       {ready && cards.map((card, index) => {
         // 计算卡片宽高
         const isActive = activeCard === index;
-        // 以左上角为基准定位
-        const left = windowSize.width * parseFloat(card.position.left) / 100;
-        const top = windowSize.height * parseFloat(card.position.top) / 100;
-        // 加上漂浮偏移
-        const leftPos = left + (floatOffsets[index]?.x || 0);
-        const topPos = top + (floatOffsets[index]?.y || 0);
+        const isMobile = windowSize.width <= 768;
+        
+        // 移动端特殊定位逻辑
+        let leftPos, topPos;
+        if (isMobile) {
+          // 移动端：将卡片排列在屏幕中央区域，避免超出边界
+          const cardSpacing = 80;
+          const startTop = windowSize.height * 0.15; // 从15%的高度开始
+          leftPos = windowSize.width * 0.1; // 左边距10%
+          topPos = startTop + index * cardSpacing;
+          
+          // 确保不超出屏幕底部（考虑底部导航栏70px + 安全距离）
+          const maxTop = windowSize.height - 150 - (isActive ? 200 : 60);
+          if (topPos > maxTop) {
+            topPos = maxTop;
+          }
+        } else {
+          // 桌面端：原有逻辑
+          const left = windowSize.width * parseFloat(card.position.left) / 100;
+          const top = windowSize.height * parseFloat(card.position.top) / 100;
+          // 桌面端添加漂浮偏移，移动端不添加
+          leftPos = left + (floatOffsets[index]?.x || 0);
+          topPos = top + (floatOffsets[index]?.y || 0);
+        }
+        
         return (
           <div
             key={index}
@@ -275,6 +315,11 @@ export default function FloatingCards({ points = [] }: FloatingCardsProps) {
               top: topPos,
               zIndex: isActive ? 20 : 10,
               transformOrigin: 'left top',
+              // 移动端添加最大宽度限制
+              ...(isMobile && {
+                maxWidth: windowSize.width * 0.8,
+                right: windowSize.width * 0.1,
+              })
             }}
           >
             <div
@@ -282,9 +327,10 @@ export default function FloatingCards({ points = [] }: FloatingCardsProps) {
                 activeCard === index
                   ? 'scale-100 opacity-100'
                   : 'scale-95 opacity-90 hover:scale-105 hover:opacity-100'
-              }`}
+              } ${isMobile ? 'cursor-pointer' : ''}`}
               onMouseEnter={() => handleCardEnter(index)}
               onMouseLeave={() => handleCardLeave(index)}
+              onClick={() => handleCardClick(index)}
             >
               <div
                 style={
@@ -298,8 +344,8 @@ export default function FloatingCards({ points = [] }: FloatingCardsProps) {
                 className={`relative bg-black/80 backdrop-blur-sm p-4 transition-all duration-300 ${
                   index === 0
                     ? (activeCard === 0 ? '' : 'min-w-[120px]')
-                    : (activeCard === index ? 'min-w-[240px]' : 'min-w-[120px]')
-                }`}
+                    : (activeCard === index ? (isMobile ? 'min-w-[280px]' : 'min-w-[240px]') : 'min-w-[120px]')
+                } ${isMobile ? 'max-w-full' : ''}`}
               >
                 <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#32c8f4] opacity-70 group-hover:opacity-100 group-hover:h-[3px] transition-all"></div>
 
@@ -316,10 +362,12 @@ export default function FloatingCards({ points = [] }: FloatingCardsProps) {
 
                 <div 
                   className={`overflow-hidden transition-all duration-300 ${
-                    activeCard === index ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                    activeCard === index ? (isMobile ? 'max-h-60 opacity-100' : 'max-h-96 opacity-100') : 'max-h-0 opacity-0'
                   }`}
                 >
-                  <div className="text-gray-300 animate-fadeIn space-y-2">
+                  <div className={`text-gray-300 animate-fadeIn space-y-2 ${isMobile ? 'overflow-y-auto' : ''}`}
+                       style={isMobile ? { maxHeight: '200px' } : {}}
+                  >
                     {index === 0 && activeCard === 0 && (
                       <div className="fade-in">
                         {propertyLabels.map((label, i) => (
@@ -353,7 +401,7 @@ export default function FloatingCards({ points = [] }: FloatingCardsProps) {
                       </div>
                     )}
                     {index === 2 && activeCard === 2 && (
-                      <div className="fade-in grid grid-cols-4 gap-4">
+                      <div className={`fade-in grid gap-4 ${isMobile ? 'grid-cols-3' : 'grid-cols-4'}`}>
                         {skillIcons.slice(0, skillShowCount).map((icon) => (
                           <div key={icon.alt} style={{width:44, height:44, background:'#fff', borderRadius:0, borderBottom:'4px solid #ffe600', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 2px 8px rgba(0,0,0,0.12)'}}>
                             <Image src={icon.src} alt={icon.alt} width={36} height={36} style={{width:36, height:36, objectFit:'contain', display:'block'}} />
@@ -362,7 +410,7 @@ export default function FloatingCards({ points = [] }: FloatingCardsProps) {
                       </div>
                     )}
                     {index === 3 && activeCard === 3 && (
-                      <div className="fade-in text-base leading-relaxed whitespace-pre-line overflow-auto" style={{maxHeight: '50vh', wordBreak: 'break-word'}}>
+                      <div className="fade-in text-base leading-relaxed whitespace-pre-line overflow-auto" style={{maxHeight: isMobile ? '180px' : '50vh', wordBreak: 'break-word'}}>
                         {profileTyped}
                       </div>
                     )}

@@ -35,7 +35,7 @@ export default function Projects() {
     <main className="relative min-h-screen">
       <div>
         <section id="projects" className="min-h-screen relative">
-          <div className="max-w-4xl mx-auto px-4 py-24">
+          <div className="max-w-4xl mx-auto px-4 py-24 pb-32">
             {/* <h2 className="text-3xl font-bold mb-8">Projects</h2> */}
             <div className="relative w-full h-[600px]">
               <div className="absolute inset-0 z-10">

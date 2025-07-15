@@ -16,6 +16,16 @@ export default function Home() {
   const oomphRef = useRef<Oomph | null>(null);
 
   useEffect(() => {
+    // 添加 home-page 类到 body
+    document.body.classList.add('home-page');
+    
+    // 清理函数，组件卸载时移除类
+    return () => {
+      document.body.classList.remove('home-page');
+    };
+  }, []);
+
+  useEffect(() => {
     if (titleRef.current && !oomphRef.current) {
       oomphRef.current = new Oomph(titleRef.current, {
         scramble: true,
