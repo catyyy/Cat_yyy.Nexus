@@ -7,30 +7,21 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  --foreground-rgb: 23, 23, 23;  /* 改为深色文字 */
-  --background-start-rgb: 255, 255, 255;  /* 改为白色背景 */
-  --background-end-rgb: 255, 255, 255;  /* 改为纯白色，移除渐变 */
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #ffffff;  /* 即使在暗色模式下也保持白色背景 */
-    --foreground: #171717;
-  }
+  --font-geist-sans: "Geist Sans", sans-serif;
+  --font-geist-mono: "Geist Mono", monospace;
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: rgb(var(--background-start-rgb));  /* 移除渐变，使用纯色背景 */
-  min-height: 100vh;
+  color: var(--foreground);
+  background: transparent;
   font-family: Arial, Helvetica, sans-serif;
+  overflow-x: hidden; /* 防止水平滚动 */
+}
+
+/* 隐藏滚动条 */
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
 }
 
 /* 悬浮头像框样式 */
@@ -263,22 +254,36 @@ body {
   background: rgba(0, 0, 0, 0.95);
   backdrop-filter: blur(8px);
   border-bottom: 3px solid rgba(0, 0, 0, 0.18);
+  transition: background 0.8s ease-in-out, border-bottom 0.8s ease-in-out;
 }
 
 #header.on-dark {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(8px);
   border-bottom: 3px solid rgba(255, 255, 255, 0.18);
+  transition: background 0.8s ease-in-out, border-bottom 0.8s ease-in-out;
 }
 
 #header.on-dark .logo,
 #header.on-dark nav a {
   color: #000000;
+  transition: color 0.8s ease-in-out;
 }
 
 #header.on-light .logo,
 #header.on-light nav a {
   color: #ffffff;
+  transition: color 0.8s ease-in-out;
+}
+
+#header.on-light .logo img {
+  filter: invert(1);
+  transition: filter 0.8s ease-in-out;
+}
+
+#header.on-dark .logo img {
+  filter: invert(0);
+  transition: filter 0.8s ease-in-out;
 }
 
 .logo {
@@ -457,11 +462,9 @@ body {
     padding-bottom: 80px;
   }
   
-  /* 防止移动端主页和about页面滚动 */
+  /* 防止移动端主页滚动 */
   body:has(#home),
-  body:has(#about),
-  body.home-page,
-  body.about-page {
+  body.home-page {
     overflow-x: hidden;
     overflow-y: hidden;
     height: 100vh;
@@ -469,26 +472,20 @@ body {
     width: 100%;
   }
   
-  /* 隐藏主页和about页面滚动条 */
+  /* 隐藏主页滚动条 */
   body:has(#home)::-webkit-scrollbar,
-  body:has(#about)::-webkit-scrollbar,
-  body.home-page::-webkit-scrollbar,
-  body.about-page::-webkit-scrollbar {
+  body.home-page::-webkit-scrollbar {
     display: none;
   }
   
   body:has(#home),
-  body:has(#about),
-  body.home-page,
-  body.about-page {
+  body.home-page {
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
   }
   
   main:has(#home),
-  main:has(#about),
-  .home-page main,
-  .about-page main {
+  .home-page main {
     height: 100vh;
     overflow: hidden;
     position: relative;
@@ -496,16 +493,17 @@ body {
   }
   
   /* 其他页面允许正常滚动 */
-  body:not(:has(#home)):not(:has(#about)):not(.home-page):not(.about-page) {
-    overflow: auto;
-    height: auto;
-    position: static;
+  body:not(:has(#home)):not(.home-page) {
+    overflow-y: auto !important;
+    overflow-x: hidden;
+    height: auto !important;
+    position: static !important;
   }
   
-  main:not(:has(#home)):not(:has(#about)):not(.home-page main):not(.about-page main) {
-    height: auto;
-    overflow: visible;
-    position: static;
+  main:not(:has(#home)):not(.home-page main) {
+    height: auto !important;
+    overflow: visible !important;
+    position: static !important;
     min-height: 100vh;
   }
   
@@ -522,29 +520,6 @@ body {
     position: static;
     min-height: 100vh;
     padding-bottom: 100px; /* 为底部导航栏留出更多空间 */
-  }
-  
-  /* about 页面禁止滚动 - 强制应用 */
-  body:has(#about),
-  body.about-page {
-    overflow: hidden !important;
-    height: 100vh !important;
-    position: fixed !important;
-    width: 100% !important;
-  }
-  
-  main:has(#about),
-  main:has(.about-page),
-  .about-page main {
-    height: 100vh !important;
-    overflow: hidden !important;
-    position: relative !important;
-  }
-  
-  /* about页面隐藏滚动条 */
-  body:has(#about)::-webkit-scrollbar,
-  body.about-page::-webkit-scrollbar {
-    display: none !important;
   }
   
   #home {

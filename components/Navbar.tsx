@@ -3,25 +3,45 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import { Oomph } from '@/utils/Oomph';
+import nextConfig from "@/next.config";
+const BASE_PATH = nextConfig.basePath || "";
 
 const Navbar = () => {
+  const pathname = usePathname();
   const navLinksRef = useRef<(HTMLAnchorElement | null)[]>([]);
   const mobileNavLinksRef = useRef<(HTMLAnchorElement | null)[]>([]);
-  const currentChapterIndex = useRef(0);
-  const [isOnDarkBg, setIsOnDarkBg] = useState(true);
+  const [isOnDarkBg, setIsOnDarkBg] = useState(false);
 
   useEffect(() => {
-    // 检查当前路径并设置初始高亮状态
-    const currentPath = window.location.pathname;
-    if (currentPath === '/') {
-      updateNavHighlight(0);
-    } else if (currentPath === '/about') {
-      updateNavHighlight(1);
-    } else if (currentPath === '/projects') {
-      updateNavHighlight(2);
+    // Determine if we are on a dark background page
+    // Currently only '/about' is explicitly dark (bg-black)
+    let targetIsDark = false;
+    if (pathname === '/about') {
+      targetIsDark = true;
     }
 
+    // Delay the color switch to match the page exit animation duration (0.8s)
+    // This ensures the navbar text remains visible against the exiting page background
+    // We start the transition slightly earlier so it blends with the page fade
+    const timer = setTimeout(() => {
+      setIsOnDarkBg(targetIsDark);
+    }, 100);
+
+    // Update active state based on pathname immediately
+    const index = pathname === '/' ? 0 : pathname === '/about' ? 1 : pathname === '/projects' ? 2 : -1;
+    if (index !== -1) {
+      updateNavHighlight(index);
+    } else if (pathname === '/') {
+       // fallback for home page if exact match fails
+       updateNavHighlight(0);
+    }
+
+    return () => clearTimeout(timer);
+  }, [pathname]);
+
+  useEffect(() => {
     // 初始化字母动画效果（仅桌面端）
     navLinksRef.current.forEach((link, index) => {
       if (link) {
@@ -43,58 +63,9 @@ const Navbar = () => {
         oomph.init();
       }
     });
-
-    // 检测当前section的背景色并更新导航栏样式
-    const checkBackground = () => {
-      // 首先检查当前页面路径
-      const currentPath = window.location.pathname;
-      if (currentPath === '/about') {
-        const aboutSection = document.getElementById('about');
-        if (aboutSection?.classList.contains('bg-black')) {
-          setIsOnDarkBg(true);
-          updateNavHighlight(1);
-          return;
-        }
-      }
-
-      const sections = [
-        'home',
-        'about',
-        'projects'
-      ];
-      for (const section of sections) {
-        const element = document.getElementById(section);
-        if (element) {
-          const rect = element.getBoundingClientRect();
-          if (rect.top <= 60 && rect.bottom >= 60) { // 导航栏高度是60px
-            const isBlackBg = element.classList.contains('bg-black');
-            setIsOnDarkBg(isBlackBg);
-            updateNavHighlight(sections.indexOf(section));
-            break;
-          }
-        }
-      }
-    };
-
-    const handleScroll = () => {
-      checkBackground();
-    };
-
-    // 初始检查和滚动监听
-    checkBackground();
-    window.addEventListener('scroll', handleScroll);
-    // 添加路由变化后的检查
-    window.addEventListener('popstate', checkBackground);
-    
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('popstate', checkBackground);
-    };
   }, []);
 
   const updateNavHighlight = (index: number) => {
-    currentChapterIndex.current = index;
-    
     // 更新桌面端导航高亮
     navLinksRef.current.forEach((link, i) => {
       if (link) {
@@ -113,8 +84,8 @@ const Navbar = () => {
   return (
     <>
       {/* 顶部导航栏 - 移动端只显示logo */}
-      <header 
-        id="header" 
+       <header 
+         id="header" 
         className={isOnDarkBg ? 'on-dark' : 'on-light'}
         style={{
           position: 'fixed',
@@ -123,25 +94,19 @@ const Navbar = () => {
           width: '100%',
           height: '60px',
           zIndex: 1000,
-          transition: 'all 0.3s ease'
         }}
       >
-        <h1 className="logo">
-          <Link href="/">
-            <Image 
-              src="/favicon.ico" 
-              alt="Favicon" 
-              width={32} 
-              height={32} 
-              style={{ 
-                display: 'inline-block', 
-                marginRight: '8px', 
-                verticalAlign: 'middle',
-                filter: isOnDarkBg ? 'none' : 'invert(1)',
-                transition: 'filter 0.3s ease'
-              }}
-            />
-            .Nexus();
+        <h1 className="logo" style={{ display: 'flex', alignItems: 'center' }}>
+          <Link href="/" scroll={false} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+             <Image 
+                src={`${BASE_PATH}/favicon.ico`} 
+                alt="Logo" 
+                width={32} 
+                height={32} 
+                className="w-8 h-8 object-contain"
+                priority
+             />
+            <span>.Nexus();</span>
           </Link>
         </h1>
         {/* 桌面端导航栏 */}
@@ -154,6 +119,7 @@ const Navbar = () => {
                 className="bel"
                 ref={el => { if(el) navLinksRef.current[0] = el }}
                 data-chapter-index="0"
+                scroll={false}
               >
                 Home
               </Link>
@@ -165,6 +131,7 @@ const Navbar = () => {
                 className="dis"
                 ref={el => { if(el) navLinksRef.current[1] = el }}
                 data-chapter-index="1"
+                scroll={false}
               >
                 About
               </Link>
@@ -176,6 +143,7 @@ const Navbar = () => {
                 className="ima"
                 ref={el => { if(el) navLinksRef.current[2] = el }}
                 data-chapter-index="2"
+                scroll={false}
               >
                 Projects
               </Link>
@@ -194,6 +162,7 @@ const Navbar = () => {
               className="bel mobile-nav-link"
               ref={el => { if(el) mobileNavLinksRef.current[0] = el }}
               data-chapter-index="0"
+              scroll={false}
             >
               Home
             </Link>
@@ -205,6 +174,7 @@ const Navbar = () => {
               className="dis mobile-nav-link"
               ref={el => { if(el) mobileNavLinksRef.current[1] = el }}
               data-chapter-index="1"
+              scroll={false}
             >
               About
             </Link>
@@ -216,6 +186,8 @@ const Navbar = () => {
               className="ima mobile-nav-link"
               ref={el => { if(el) mobileNavLinksRef.current[2] = el }}
               data-chapter-index="2"
+              prefetch={false}
+              scroll={false}
             >
               Projects
             </Link>

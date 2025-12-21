@@ -3,21 +3,46 @@
     "id": 1,
     "title": "RSSHub-ISCT Route",
     "description": "RSS Subscription for ScienceTokyo News",
+    "detailImage": "/images/RSSHub.png",
+    "technologies": [
+      "Node.js",
+      "RSSHub",
+      "Cheerio"
+    ],
+    "longDescription": "A custom RSSHub route developed to subscribe to news from Science Tokyo (formerly Tokyo Tech). This tool scrapes the official news page and converts it into a standard RSS feed, allowing students and staff to stay updated with the latest announcements using their favorite RSS reader.",
     "image": "/images/RSSHub.png",
-    "link": "https://rsshub.app/isct/news/ja"
+    "link": "https://rsshub.app/isct/news/ja",
+    "githubLink": "https://github.com/DIYgod/RSSHub"
   },
   {
     "id": 2,
     "title": "ISCT Portal Auto-Login",
     "description": "Tampermonkey script for ISCT Portal Auto-Login",
+    "detailImage": "/images/GF.bmp",
+    "technologies": [
+      "JavaScript",
+      "Tampermonkey",
+      "DOM Manipulation"
+    ],
+    "longDescription": "A Userscript designed to automate the login process for the ISCT Portal. It securely handles credential auto-filling and bypasses repetitive login screens, significantly improving the user experience for frequent visitors.",
     "image": "/images/GF.bmp",
-    "link": "https://greasyfork.org/ja/scripts/533014-%E6%9D%B1%E4%BA%AC%E7%A7%91%E5%AD%A6%E5%A4%A7%E5%AD%A6%E7%90%86%E5%B7%A5%E5%AD%A6%E9%83%A8%E3%83%9D%E3%83%BC%E3%82%BF%E3%83%AB%E8%87%AA%E5%8B%95%E8%AA%8D%E8%A8%BC%E3%82%B7%E3%82%B9%E3%83%86%E3%83%A0"
+    "link": "https://greasyfork.org/ja/scripts/533014-%E6%9D%B1%E4%BA%AC%E7%A7%91%E5%AD%A6%E5%A4%A7%E5%AD%A6%E7%90%86%E5%B7%A5%E5%AD%A6%E9%83%A8%E3%83%9D%E3%83%BC%E3%82%BF%E3%83%AB%E8%87%AA%E5%8B%95%E8%AA%8D%E8%A8%BC%E3%82%B7%E3%82%B9%E3%83%86%E3%83%A0",
+    "githubLink": null
   },
   {
     "id": 3,
     "title": "Homepage",
     "description": "WatchDog Style Homepage",
+    "detailImage": "/images/HP.bmp",
+    "technologies": [
+      "Next.js",
+      "React",
+      "TailwindCSS",
+      "Framer Motion"
+    ],
+    "longDescription": "My personal portfolio website designed with a 'Watch Dogs' inspired aesthetic. It features glitch effects, terminal-like interactions, and a fully responsive layout. Built with Next.js for performance and SEO.",
     "image": "/images/HP.bmp",
-    "link": "http://catyyy.top/"
+    "link": "http://catyyy.top/",
+    "githubLink": "https://github.com/catyyy/catyyy.github.io"
   }
-] 
+]
